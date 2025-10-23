@@ -693,4 +693,8 @@ Comprehensive documentation of all action step types with examples and configura
 
 Detailed JavaScript API reference covering all major objects (Draft, Editor, App, HTTP, etc.) with method signatures, parameters, and return values. Load when scripting complex actions or working with specific API features.
 
+### references/template-tags-reference.md
+
+Complete reference for Drafts template tag syntax covering all built-in tags (identifier, content, location, date/time, utility), formatting options (strftime, DateFormatter), date adjustment, special markup, and escaping. Load when working with templates or needing detailed syntax beyond the core template concepts in this skill.
+
 Use these references as needed for detailed implementation guidance beyond the core concepts covered in this skill.
