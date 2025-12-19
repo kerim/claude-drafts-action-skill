@@ -162,6 +162,171 @@ Scripting and advanced automation:
 
 9. **Configured Value**: Create user-configurable action parameters
 
+## HTMLPreview Forms
+
+HTMLPreview allows you to create custom HTML-based user interfaces that go beyond standard prompts. This is useful for complex forms, multi-step wizards, draft selection interfaces, and any interaction requiring custom styling.
+
+### The Working Pattern
+
+The reliable pattern for HTMLPreview in a Script step:
+
+```javascript
+var preview = HTMLPreview.create();
+preview.hideInterface = true;  // Hide default toolbar for custom buttons
+
+if (preview.show(html)) {
+  var vals = context.previewValues["formValues"];
+  if (vals && vals.choice) {
+    // Process the user's choice
+  }
+} else {
+  // User cancelled
+  context.cancel();
+}
+```
+
+### Key Points
+
+1. **Use `context.previewValues`** to access data sent from HTML
+2. **Check `preview.show()` return value** - `true` if continued, `false` if cancelled
+3. **Call `Drafts.send(key, value)`** in HTML JavaScript to send data
+4. **Call `Drafts.continue()`** to close the preview and continue execution
+
+### Basic HTML Template
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      font-family: -apple-system, sans-serif;
+      padding: 20px;
+      background: #fff;
+      color: #000;
+    }
+    @media (prefers-color-scheme: dark) {
+      body { background: #1c1c1e; color: #f5f5f7; }
+    }
+    button {
+      display: block;
+      width: 100%;
+      padding: 14px;
+      margin: 10px 0;
+      border-radius: 12px;
+      font-size: 16px;
+    }
+    .primary {
+      background: #007aff;
+      color: white;
+      border: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>Choose an Option</h1>
+  <button class="primary" onclick="choose('yes')">Yes</button>
+  <button onclick="choose('no')">No</button>
+  <script>
+    function choose(choice) {
+      Drafts.send("formValues", { choice: choice });
+      Drafts.continue();
+    }
+  </script>
+</body>
+</html>
+```
+
+### Form Data Collection
+
+For forms with multiple fields:
+
+```html
+<form id="data-form">
+  <input type="text" id="title" value="">
+  <textarea id="notes"></textarea>
+  <input type="checkbox" id="flagged">
+</form>
+<button onclick="submitForm()">Submit</button>
+
+<script>
+function submitForm() {
+  var form = document.getElementById('data-form');
+  var data = {};
+  for (var e of form.elements) {
+    if (e.type === 'checkbox') {
+      data[e.id] = e.checked;
+    } else if (e.id) {
+      data[e.id] = e.value;
+    }
+  }
+  Drafts.send("formValues", data);
+  Drafts.continue();
+}
+</script>
+```
+
+Then in your script:
+
+```javascript
+if (preview.show(html)) {
+  var vals = context.previewValues["formValues"];
+  var title = vals.title;
+  var notes = vals.notes;
+  var flagged = vals.flagged;
+}
+```
+
+### Sequential Prompts
+
+You can show multiple HTMLPreview prompts in a loop:
+
+```javascript
+var items = Draft.query("", "inbox", [], [], "created", false);
+
+for (var i = 0; i < items.length; i++) {
+  var html = buildPromptHTML(items[i], i + 1, items.length);
+  
+  var preview = HTMLPreview.create();
+  preview.hideInterface = true;
+  
+  if (preview.show(html)) {
+    var vals = context.previewValues["formValues"];
+    if (vals.choice === "stop") break;
+    // Process choice...
+  } else {
+    break;
+  }
+}
+```
+
+### Escaping User Content
+
+Always escape user content before inserting into HTML:
+
+```javascript
+function escapeHtml(text) {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+var html = `<div>${escapeHtml(draft.content)}</div>`;
+```
+
+### Common Mistakes
+
+1. **Don't use `preview.actionLog`** - use `context.previewValues` instead
+2. **Don't forget `Drafts.continue()`** - preview won't close without it
+3. **Don't skip checking `preview.show()` return** - user may have cancelled
+4. **Don't use `let`/`const` across multiple Script steps** - causes duplicate variable errors
+
+See **references/htmlpreview-forms-reference.md** for complete documentation including dark mode CSS, button styles, progress bars, and full working examples.
+
 ## Template System
 
 Drafts uses a lightweight template engine with `[[tag]]` syntax for dynamic content.
@@ -696,5 +861,9 @@ Detailed JavaScript API reference covering all major objects (Draft, Editor, App
 ### references/template-tags-reference.md
 
 Complete reference for Drafts template tag syntax covering all built-in tags (identifier, content, location, date/time, utility), formatting options (strftime, DateFormatter), date adjustment, special markup, and escaping. Load when working with templates or needing detailed syntax beyond the core template concepts in this skill.
+
+### references/htmlpreview-forms-reference.md
+
+Comprehensive guide to creating custom HTML-based user interfaces using HTMLPreview. Covers the working pattern for `context.previewValues`, form data collection, sequential prompts, dark mode CSS, button styles, progress bars, escaping user content, and common mistakes to avoid. Load when building custom HTML interfaces that go beyond standard prompts.
 
 Use these references as needed for detailed implementation guidance beyond the core concepts covered in this skill.
