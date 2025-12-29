@@ -423,6 +423,7 @@ var drafts = Draft.query("", "inbox", [], [], "modified", true);
 if (drafts.length === 0) {
   app.displayInfoMessage("No drafts found");
   context.cancel();
+  return;  // Required: context.cancel() doesn't stop script execution
 }
 
 // Build the HTML
