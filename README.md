@@ -51,23 +51,32 @@ Complete API documentation for:
 
 ## Installation
 
-### For Claude Code Users
+### For Claude Code
 
-1. Download or clone this repository
-2. Copy the entire `claude-drafts-action-skill` folder to your Claude Code skills directory:
-   - **User skills**: `~/.claude/skills/`
-   - **Project skills**: `<project>/.claude/skills/`
+1. Clone or download this repository
+2. Copy the `skill/` folder to your Claude Code skills directory:
+   ```bash
+   cp -r skill ~/.claude/skills/drafts-actions
+   ```
+3. Restart Claude Code to load the skill
 
-3. The skill will be automatically loaded and available in Claude Code
+### Alternative: Direct Download
+
+1. Download just the `skill/` folder from this repository
+2. Rename it to `drafts-actions` and place it at `~/.claude/skills/drafts-actions/`
+3. Restart Claude Code
 
 ### Directory Structure
 
 ```
 claude-drafts-action-skill/
-├── SKILL.md                              # Main skill documentation
-└── references/
-    ├── action-steps-reference.md         # Detailed step type reference
-    └── scripting-api-reference.md        # Complete JavaScript API docs
+├── skill/                                # Symlinked to ~/.claude/skills/drafts-actions/
+│   ├── SKILL.md                          # Main skill documentation
+│   └── references/
+│       ├── action-steps-reference.md     # Detailed step type reference
+│       └── scripting-api-reference.md    # Complete JavaScript API docs
+├── README.md                             # This file
+└── CLAUDE.md                             # Development workflow instructions
 ```
 
 ## Usage
